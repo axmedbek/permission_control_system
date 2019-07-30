@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
   Created by IntelliJ IDEA.
   User: axmedbek
@@ -259,15 +260,131 @@
                     </ul>
                 </div>
                 <div class="col-md-10">
-                    content
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Role</th>
+                            <th>Users</th>
+                            <th>Modules</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <c:forEach items="${roles}" var="role">
+                            <tr id="${role.id}">
+                                <th scope="row">${role.id}</th>
+                                <td>${role.name}</td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-warning"
+                                            data-toggle="modal" data-modal-type="users"
+                                            data-target="#multi_purpose_modal">
+                                        Users
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-success"
+                                            data-toggle="modal" data-modal-type="modules"
+                                            data-target="#multi_purpose_modal">
+                                        Modules
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-primary"
+                                            data-toggle="modal" data-modal-type="edit"
+                                            data-target="#multi_purpose_modal">
+                                        Edit
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger"
+                                            data-toggle="modal" data-modal-type="delete"
+                                            data-target="#multi_purpose_modal">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="multi_purpose_modal" tabindex="-1" role="dialog" aria-labelledby="multi_purpose_modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="multi_purpose_modal_label">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript" src="${pageContext.request.contextPath}/assets/js/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/assets/js/popper.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/assets/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/assets/js/jquery.multi-select.js"></script>
+<script>
+
+    $('[data-target="#multi_purpose_modal"]').on('click',function(){
+        var token = $('#_csrf').attr('content');
+        var header = $('#_csrf_header').attr('content');
+        var selected_modal = $("#multi_purpose_modal");
+        var role_id = selected_modal.find('tr:parents(0)').attr('role_id');
+
+        $.ajax({
+            type: "POST",
+            url: '${pageContext.request.contextPath}/roles/load',
+            data :
+                {
+                    type : $(this).attr('data-modal-type'),
+                    role_id : role_id},
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader(header, token);
+            },
+            success: function(data) {
+                selected_modal.find('.modal-body').html('');
+                selected_modal.find('.modal-body').html(data);
+                selected_modal.find('#role_users').multiSelect();
+                <%--selected_modal.find('.modal-title').text('${header}');--%>
+                // console.log(selected_modal.find('form'));
+
+                <%--$.ajax({--%>
+                    <%--type: "POST",--%>
+                    <%--url: '${pageContext.request.contextPath}/roles/process',--%>
+                    <%--data : {type : selected_modal.attr('data-modal-type')},--%>
+                    <%--beforeSend: function(xhr) {--%>
+                        <%--xhr.setRequestHeader(header, token);--%>
+                    <%--},--%>
+                    <%--success: function(data) {--%>
+                        <%--console.log(data);--%>
+                    <%--},--%>
+                    <%--error: function(request, status, error) {--%>
+                        <%--console.log(error);--%>
+                    <%--}--%>
+                <%--});--%>
+            },
+            error: function(request, status, error) {
+                console.log(error);
+            }
+        });
+    });
+
+</script>
 </body>
 </html>
